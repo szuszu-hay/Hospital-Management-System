@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointments{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <div class="img-container">
+        <img src="{{ url_for('static', filename='img/patient_appt.jpg') }}" alt="Doctor Appointment">
+
+        <h1>Your Appointments</h1>
+    </div>
+
+    <p>Book and view your upcoming appointments.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+
+
+
+<div class="patient-appt">
+
+    <div class="appt-filter">
+        <label for="apptFilter">View Appointments:</label>
+        <select id="apptFilter" onchange="filterAppointments()">
+            <option value="upcoming">Upcoming</option>
+            <option value="missed">Missed</option>
+        </select>
+    </div>
+
+    <!-- upcoming appt -->
+    <div class="upcoming-section" id="upcomingSection">
+        
+        <h2>Upcoming Appointments</h2>
+        {% if grouped_upcoming %}
+        {% for date, upcoming_gp in grouped_upcoming.items() %}
+        {% for appointment in upcoming_gp %}
+        <div class="my-appt">
+            <div class="ref" style="text-decoration: underline; font-size: 15px;">
+                Booking Ref: {{ appointment.AppointmentID }}
+            </div>
+
+            <div class="appt-info">
+                <p><strong>{{ appointment.Date }} | {{ appointment.Time }}</strong><br>
+                    Dr. {{ appointment.DoctorName }}<br>
+                    Nurse: {{ appointment.NurseName }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+
+        {% else %}
+        <div class="no-appt">
+            <p class="empty-msg">No Upcoming Apppointments ⭐</p>
+
+            <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+
+            <a href="{{ url_for('patient_dashboard') }}" class="back">
+                Back to Dashboard ▸
+            </a>
+        </div>
+
+        {% endif %}
+    </div>
+
+    <!-- missed appt -->
+    <div class="upcoming-section" id="missedSection">
+        
+        <h2>Missed Appointments</h2>
+        {% if grouped_missed %}
+        {% for date, missed_gp in grouped_missed.items() %}
+        {% for appointment in missed_gp %}
+        <div class="my-appt">
+            <div class="ref" style="text-decoration: underline; font-size: 15px; color: rgb(166, 16, 16);">
+                Booking Ref: {{ appointment.AppointmentID }}
+            </div>
+
+            <div class="appt-info">
+                <p style="color: rgb(166, 16, 16);"><strong>{{ appointment.Date }} | {{ appointment.Time }}</strong><br>
+                    Dr. {{ appointment.DoctorName }}<br>
+                    Nurse: {{ appointment.NurseName }}
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+
+        {% else %}
+        <div class="no-appt">
+            <p class="empty-msg">No Missed Apppointments ⭐</p>
+
+            <img src="{{ url_for('static', filename='img/no-slots.jpg') }}" alt="A calender">
+
+            <a href="{{ url_for('patient_dashboard') }}" class="back">
+                Back to Dashboard ▸
+            </a>
+        </div>
+
+        {% endif %}
+    </div>
+
+
+    <!-- Book new appt -->
+    <div class="new-appt" id="book-section">
+        <h2>Book New Appointment</h2>
+        <p>Choose department and doctor to view available slots.</p>
+
+        <!--  Choose Department -->
+        <div class="department-section">
+            <form method="GET" action="{{ url_for('patient_appointments') }}#book-section">
+                <select name="department" onchange="this.form.submit()">
+                    <option value="" disabled selected>Select Department</option>
+
+                    {% for dept in departments %}
+                    <option value="{{ dept.Department }}" {% if chosen_department==dept.Department %}selected{% endif
+                        %}>{{
+                        dept.Department }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {% if doctors %}
+        <h3>Available Doctors</h3>
+
+        <div class="doctor-section">
+            {% for doctor in doctors %}
+            <a class="each-doct {% if chosen_doctor == doctor.DoctorID|string %}active{% endif %}"
+                href="?department={{ chosen_department }}&doctor={{ doctor.DoctorID }}#book-section">
+                Dr. {{ doctor.Name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if slots_gp %}
+        <h3>Available Slots</h3>
+
+        <div class="slots-wrap">
+            {% for date, slots in slots_gp.items() %}
+
+            <div class="date-group">
+                <h4>📆{{ date }}</h4>
+
+                <div class="slots">
+                    {% for slot in slots %}
+                    <button type="button" class="slot-block" data-slot="{{ slot.SlotID }}" data-date="{{ date }}"
+                        data-time="{{ slot.Time }}" data-doctor="Dr. {{ chosen_doctor_name }}">
+                        {{ slot.Time }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% endfor %}
+        </div>
+
+        {% elif chosen_doctor %}
+        <div class="no-appt">
+            <p class="empty-msg">No Available Slots For Now 🚫</p>
+            <img src="{{ url_for('static', filename='img/no-slots.jpg') }}" alt="A calendar">
+            <p class="instruct">Choose an alternative doctor</p>
+        </div>
+
+        {% endif %}
+
+        <form method="POST" id="bookApptForm">
+            <input type="hidden" name="slotId" id="selectedSlot">
+            <input type="hidden" name="doctorId" value="{{ chosen_doctor }}">
+
+            <button type="button" onclick="openBookForm()" id="bookSlotBtn" style="display: none;">Book
+                Appointment</button>
+        </form>
+
+    </div>
+
+    <div id="confirmBooking" class="modal">
+        <div class="popup">
+            <div class="close-header">
+                <h4>Confirm Booking</h4>
+                <span class="close" onclick="cancelBooking()">&times;</span>
+            </div>
+
+            <div class="confirm-content">
+                <p>Are you sure you want to book this appointment?</p>
+                <br>
+                <div class="book-info">
+                    <p><strong><span id="thisDoct"></span></strong></p>
+                    <p><strong>Date:</strong> <span id="thisDate"></span></p>
+                    <p><strong>Time:</strong> <span id="thisTime"></span></p>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button onclick="confirmBooking()">YES</button>
+                <button onclick="cancelBooking()">CANCEL</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

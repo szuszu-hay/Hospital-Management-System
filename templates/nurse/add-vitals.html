@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Vitals{% endblock %}
+
+{% block content %}
+
+
+<div class="info-header">
+    <h1>Patient Vitals</h1>
+    <p>Add your patients' temperature, blood presure, and heart rate.</p>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="vitalsInputs">
+
+    <form method="POST" id="vitals-form">
+        <div class="each-info">
+            <p><strong>Appointment ID:</strong></p>
+            <input type="text" name="appt_id" value="{{ appointment.AppointmentID }}" readonly>
+        </div>
+
+        <div class="each-info">
+            <p><strong>Patient ID:</strong></p>
+            <input type="text" value="{{ appointment.PatientID }}" readonly>
+        </div>
+
+        <div class="each-info">
+            <p><strong>Name:</strong></p>
+            <input type="text" value="{{ appointment.PatientName }}" readonly>
+        </div>
+
+        <div class="each-info">
+            <p><strong>Doctor:</strong></p>
+            <input type="text" value="{{ appointment.DoctorName }}" readonly>
+        </div>
+
+        <div class="each-info">
+            <p><strong>Temperature (°C):</strong></p>
+            <input type="number" step="0.1" name="temperature" required>
+        </div>
+
+        <div class="each-info">
+            <p><strong>Blood Pressure:</strong></p>
+            <input type="text" name="blood_pressure" required>
+        </div>
+
+        <div class="each-info">
+            <p><strong>Heart Rate (bpm):</strong></p>
+            <input type="number" name="heart_rate" required>
+        </div>
+
+        <div>
+            <button type="submit" class="save-btn">Save Vitals</button>
+            <button type="button" onclick="cancel()">Cancel</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

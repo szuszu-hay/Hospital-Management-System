@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <h1>👨🏼‍⚕️ Doctor Dashboard</h1>
+    {% if doctor %}
+    <p>Welcome back, {{ doctor.Name }}👋🏼</p>
+    <p class="dashboard-hint">Check your upcoming appointments, assigned department, and profile information.</p>
+    {% endif %}
+</div>
+
+<!-- Stats -->
+<div class="stats">
+    <a href="{{ url_for('doctor_appointments') }}" class="blocks">
+        <h2>{{ upcoming_appointments|length }}</h2>
+        <p>Upcoming Appointments</p>
+    </a>
+
+    <a href="{{ url_for('doctor_patient_records') }}" class="blocks">
+        <h2>{{ patients|length }}</h2>
+        <p>Assigned Patients</p>
+    </a>
+
+    <a href="{{ url_for('add_slot') }}" class="blocks">
+        <h2>{{ free_slots|length }}</h2>
+        <p>Slots Free</p>
+    </a>
+</div>
+
+
+<div class="dashboard dashboard-grid dashboard-upper">
+
+    <!-- Upcoming and Ready Appointments -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Appointments</h3>
+
+            <div class="card-btn">
+                <a href="/doctor/appointments">View All</a>
+            </div>
+        </div>
+
+        <select id="appt-filter">
+            <option value="ready" selected>Ready for Check-in</option>
+            <option value="upcoming">Upcoming</option>
+        </select>
+
+        <div id="upcoming-appts">
+            {% if upcoming_appointments %}
+            {% for appointment in upcoming_appointments %}
+            <div class="appt-list">
+                <div style="text-decoration: underline;">
+                    #{{ appointment.AppointmentID }}
+                </div>
+
+                <div>
+                    <p><strong>{{ appointment.Date }} | {{ appointment.Time }}</strong><br>
+                        {{ appointment.Name }} ({{ appointment.PatientID }})</p>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <p class="empty-msg">No upcoming appointments 🎉</p>
+            {% endif %}
+        </div>
+
+        <div id="ready-appts" style="display:none;">
+            {% if ready_appointments %}
+            {% for appointment in ready_appointments %}
+            <div class="appt-list ready">
+                <div style="text-decoration: underline;">
+                    #{{ appointment.AppointmentID }}
+                </div>
+
+                <div>
+                    <p><strong>{{ appointment.Date }} | {{ appointment.Time }}</strong><br>
+                        {{ appointment.Name }} ({{ appointment.PatientID }})</p>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <p class="empty-msg">No check-in patients 🤕</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- Profile Summary -->
+    <div class="card profile-info">
+        <h3>Profile Summary</h3>
+
+        <div class="profile-content">
+            {% if doctor %}
+            <p><strong>Dr. {{ doctor.Name }}</strong></p>
+            <p>ID: {{ doctor.DoctorID }}</p>
+            <p>Department: {{ doctor.Department }}</p>
+            <p>Email: {{ doctor.Email }}</p>
+
+            <a href="/doctor/personal-info" class="btn">View Profile</a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard dashboard-2col dashboard-lower">
+    <div class="dashboard-image">
+        <img src="{{ url_for('static', filename='img/doctor_dashboard.jpg') }}" alt="Doctor Dashboard">
+    </div>
+
+    <!-- Patient list -->
+    <div class="card patient-card">
+        <div class="card-header">
+            <h3>Assigned Patients</h3>
+            <a href="/doctor/patient-records">View All</a>
+        </div>
+
+        {% if patients %}
+        <div class="list">
+            {% for patient in patients %}
+            <div class="patients">
+                <p>{{ loop.index }}. {{ patient.Name }} ({{ patient.PatientID }})</p>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <p class="empty-msg">No patients assigned ⚠️</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

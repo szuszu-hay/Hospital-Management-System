@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Patient List{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <h1>Patient List</h1>
+    <p>View, search, and manage patients below.</p>
+
+    <div class="addPat">
+        <div class="add-button">
+            <button type="button" onclick="openAddPatient()">+ Add Patient</button>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="flash-message {{ category }}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="search-bar patient-search">
+    <input type="text" placeholder="Search by patient name or ID..." onkeyup="patientSearch()" id="idInput">
+    <button type="submit" class="search-btn">
+        <img src="{{ url_for('static', filename='img/search.png') }}" alt="Search">
+    </button>
+</div>
+
+<div class="scroll-table records-table">
+    <table>
+        <thead>
+            <tr class="clickable-row">
+                <th></th>
+                <th>PATIENT ID</th>
+                <th>PATIENT NAME</th>
+                <th>EMAIL</th>
+                <th>TELNO</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for patient in patients %}
+            <tr class="clickable-row">
+                <td>{{ loop.index }}.</td>
+                <td>{{ patient.PatientID }}</td>
+                <td>{{ patient.Name }}</td>
+                <td>{{ patient.Email }}</td>
+                <td>{{ patient.TelNo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p id="notFound" style="display:none; color:red;">
+        No matching patients found 🚫
+    </p>
+
+</div>
+
+<br><br>
+
+
+<!-- Add Patient Form -->
+<div id="addPatForm" class="modal">
+    <div class="popup">
+        <div class="close-header">
+            <h4>Add New Patients</h4>
+            <span class="close" onclick="closeAddPatient()">&times;</span>
+        </div>
+
+        <br>
+
+        <div class="addPatForm">
+            <form method="POST">
+
+                <div class="each-info">
+                    <label>Patient ID:</label>
+                    <input type="text" name="id" value="{{ new_id }}" readonly required>
+                </div>
+
+                <div class="each-info">
+                    <label>Name:</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div class="each-info">
+                    <label>Email:</label>
+                    <input type="email" name="email" required>
+                </div>
+
+                <div class="each-info">
+                    <label>TelNo:</label>
+                    <input type="tel" name="telNo" required>
+                </div>
+
+                <button type="submit" class="form-button">Generate Account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- account details preview -->
+{% if preview %}
+<div id="patAcc" class="modal show">
+    <div class="popup">
+        <div class="close-header">
+            <h4>Patient Created!</h4>
+            <span class="close" onclick="closeAddPatient()">&times;</span>
+        </div>
+
+        <div class="acc-create">
+            <br>
+            <p style="color: #888" ; "font-weight: 400">Preview Account Details</p>
+            <br>
+
+            <p><strong>Patient ID:</strong> {{ new_id }}</p>
+            <p><strong>Username:</strong> {{ generated_username }}</p>
+            <p><strong>Temporary Password:</strong> {{ generated_pw }}</p>
+
+            <form method="POST">
+                <input type="hidden" name="confirm" value="yes">
+                <input type="hidden" name="patient_id" value="{{ new_id }}">
+                <input type="hidden" name="name" value="{{ request.form.name }}">
+                <input type="hidden" name="email" value="{{ request.form.email }}">
+                <input type="hidden" name="telNo" value="{{ request.form.telNo }}">
+                <input type="hidden" name="username" value="{{ generated_username }}">
+                <input type="hidden" name="temp_pw" value="{{ generated_pw }}">
+
+                <button type="submit">OK</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.body.classList.add("scroll-lock");
+</script>
+
+{% else %}
+<script>
+    document.body.classList.remove("scroll-lock");
+</script>
+
+{% endif %}
+
+
+{% endblock %}

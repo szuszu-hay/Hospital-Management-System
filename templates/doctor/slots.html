@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}View & Add Appointment Slots{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <div class="img-container">
+        <img src="{{ url_for('static', filename='img/slot.jpg') }}" alt="Slots Hero Image">
+
+        <h1>My Appointment Slots</h1>
+        <p>View & add your appointment slots below.</p>
+    </div>
+</div>
+
+<div class="add-container">
+    <div class="add-button">
+        <button type="button" onclick="openSlotForm()">+ Add Slot</button>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<p class="instruct">Click a time slot to edit or book it.</p>
+
+
+<div class="slots-container">
+
+    {% if grouped_slots %}
+    {% for date, slots in grouped_slots.items() %}
+    <div class="date-group">
+        <div class="date-header">
+            <h3>{{ date }}</h3>
+        </div>
+
+        <div class="slots-time">
+            {% for slot in slots %}
+            <div class="time-block clickable-row" data-id="{{ slot.SlotID }}" data-date="{{ slot.Date }}"
+                data-time="{{ slot.Time }}">
+
+                <p>{{ slot.Time }}</p>
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="no-appt">
+        <h4>Slots not exist</h4>
+        <p>You don't have any appointment slots yet ⚠️</p>
+
+        <img src="{{ url_for('static', filename='img/no-slots.jpg') }}" alt="A calendar">
+
+        <a href="#" onclick="openSlotForm()" class="back">
+            Add a Slot ▸
+        </a>
+    </div>
+    {% endif %}
+
+
+</div>
+
+
+
+
+<!-- ========================================================================= -->
+<!-- pop up windows -->
+
+<!-- Edit or Book Slot Form -->
+<div id="editOrBook" class="modal">
+    <div class="popup">
+        <div class="close-header">
+            <h4>Edit or Book Your Slot</h4>
+            <span class="close" onclick="closeEditOrBookSlot()">&times;</span>
+        </div>
+
+        <form id="editSlot" class="addSlotForm" method="POST" action="/doctor/update-slot">
+            <h3>Choose your appointment slot</h3>
+
+            <div class="each-info">
+                <label>Slot ID:</label>
+                <input name="slot_id" id="modalSlotID" readonly>
+            </div>
+
+            <div class="each-info">
+                <label>Date:</label>
+                <input type="date" name="date" id="modalDate" readonly>
+            </div>
+
+            <div class="each-info">
+                <label>Time:</label>
+                <input type="time" name="time" id="modalTime" min="08:00" max="17:00" step="1800" readonly>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" name="action" value="edit" id="editBtn">Edit</button>
+                
+                <button type="submit" name="action" value="edit" id="saveBtn" style="display:none;">Save</button>
+                <button type="button" id="bookBtn">Book Slot</button>
+
+                <button type="button" id="cancelBtn" style="display:none;"
+                    onclick="closeEditOrBookSlot()">Cancel</button>
+                <button type="submit" name="action" value="delete" id="deleteBtn"
+                    onclick="return confirm('Delete this slot?')">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Slot Form -->
+<div id="addForm" class="modal">
+    <div class="popup">
+        <div class="close-header">
+            <h4>Add Appointment Slot</h4>
+            <span class="close" onclick="closeSlotForm()">&times;</span>
+        </div>
+
+        <form method="POST" class="addSlotForm">
+            <h3>Choose date and time</h3>
+
+            <div class="each-info">
+                <label>Slot Date:</label>
+                <input type="date" name="date" id="slotDate" required>
+            </div>
+
+            <div class="each-info">
+                <label>Slot Time:</label>
+
+                <input type="time" name="time" id="slotTime" min="08:00" max="17:00" step="1800" required>
+
+            </div>
+
+            <button type="submit" class="form-button">Add Slot</button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

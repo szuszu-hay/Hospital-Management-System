@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+
+    <h1>🤕 Patient Dashboard</h1>
+    {% if patient %}
+    <p>Welcome back, {{ patient.Name }}👋🏼</p>
+    <p class="dashboard-hint">Check your upcoming appointments, view medical history, and profile information.</p>
+    {% endif %}
+</div>
+
+<div class="dashboard dashboard-2col dashboard-upper">
+    <div class="dashboard-image patient-img">
+        <img src="{{ url_for('static', filename='img/patient_dashboard.jpg') }}" alt="Patient Dashboard" height="200px">
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Upcoming Appointments</h3>
+
+            <div class="card-btn">
+                <a href="/patient/appointments">View All</a>
+            </div>
+        </div>
+
+        {% if upcoming_appointments %}
+        {% for appointment in upcoming_appointments %}
+        <div class="appt-list">
+            <div style="text-decoration: underline;">
+                #{{ appointment.AppointmentID }}
+            </div>
+
+            <div>
+                <p><strong>{{ appointment.Date }} | {{ appointment.Time }}</strong><br>
+                    Dr. {{ appointment.DoctorName }} (Nurse: {{ appointment.NurseName }})</p>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <p class="empty-msg">No upcoming appointments 🎉</p>
+        {% endif %}
+    </div>   
+</div>
+
+<div class="dashboard dashboard-grid dashboard-lower">
+
+    <div class="card medical-record">
+        <div class="card-header">
+            <h3>Medical History</h3>
+
+            <div class="card-btn">
+                <a href="/patient/medical_records">View All</a>
+            </div>
+        </div>
+
+        <div class="medical-content">
+            {% if records %}
+            {% for record in records %}
+            <div class="record-sum">
+                <div>
+                    <strong>Appointment ID • {{ record.AppointmentID }}</strong> | {{ record.Date }}
+                </div>
+
+                <div>
+                    Dr. {{ record.Name }}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="empty-msg">No Medical Records Yet ⭐</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Profile Summary -->
+    <div class="card profile-info">
+        <h3>Profile Summary</h3>
+
+        <div class="profile-content">
+            {% if patient %}
+            <p><strong>Name: {{ patient.Name }}</strong></p>
+            <p>ID: {{ patient.PatientID }}</p>
+            <p>Email: {{ patient.Email }}</p>
+
+            <a href="/patient/personal-info" class="btn">View Profile</a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

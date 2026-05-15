@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Records{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+
+    <div class="img-container">
+        <img src="{{ url_for('static', filename='img/patient_medical.jpg') }}" alt="Medical Record Image">
+
+        <h1>Medical Records</h1>
+    </div>
+    <p>View all your medical records below.</p>
+</div>
+
+<div class="records">
+
+    <div class="stats">
+        <div class="blocks">
+            <h3>{{ records|length }}</h3>
+            <p>Total Records</p>
+        </div>
+
+        <div class="blocks">
+            {% if records %}
+            <h3>{{ records[0].Date }}</h3>
+            {% else %}
+            <h3>-</h3>
+            {% endif %}
+            <p>Last Visit</p>
+        </div>
+    </div>
+
+    <div class="record-title">
+        <h2>Your Past Medical Records</h2>
+    </div>
+
+    {% if records %}
+    <p class="record-instruction">Click an appointment record to view diagnosis, prescription, and vitals.</p>
+    {% for record in records %}
+
+    <div class="each-record">
+        <div class="record-sum" onclick="expand(this)">
+            <div>
+                <strong>Appointment ID • {{ record.AppointmentID }}</strong> | {{ record.Date }}
+            </div>
+
+            <div>
+                Dr. {{ record.Name }} ({{ record.DoctorID }})
+                <span class="arrow">▸</span>
+            </div>
+        </div>
+
+        <div class="record-dropdown">
+            <ul>
+                <li><strong>Diagnosis: </strong>{{ record.Diagnosis }}</li>
+                <li><strong>Prescription: </strong>{{ record.Prescriptions }}</li>
+                <li><strong>Vitals:</strong>
+                    {{ record.Temperature }}°C | {{ record.BloodPressure }} mmHg | {{ record.HeartRate }} bpm</li>
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="upcoming-section">
+        <div class="no-appt">
+            <p class="empty-msg">No Medical Records Yet ⭐</p>
+    
+            <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+    
+            <a href="{{ url_for('patient_appointments') }}" class="back">
+                Book an Appointment ▸
+            </a>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

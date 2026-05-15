@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Records{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <div class="img-container">
+        <img src="{{ url_for('static', filename='img/medical.jpg') }}" alt="Patient Records Hero Image">
+
+        <h1>Patient Records</h1>
+        <p>View your patients' records below.</p>
+    </div>
+
+    <search class="search-bar">
+        <input type="text" placeholder="Search by patient name or ID..." onkeyup="patientSearch()" id="idInput">
+        <button type="submit" class="search-btn">
+            <img src="{{ url_for('static', filename='img/search.png') }}" alt="Search">
+        </button>
+    </search>
+</div>
+
+<div class="scroll-table records-table">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Diagnosis</th>
+                <th class="prescriptionColumn">Prescription</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for record in patient_records %}
+            <tr>
+                <td>{{ loop.index }}.</td>
+                <td>{{ record.PatientID }}</td>
+                <td>{{ record.Name }}</td>
+                <td>{{ record.Diagnosis }}</td>
+                <td class="prescriptionColumn">{{ record.Prescriptions }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<p id="notFound" style="display:none; color: rgb(166, 16, 16);">
+    No matching patients found 🚫
+</p>
+
+
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Reset Password{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login-container">
+        <h1>Reset Password</h1>
+
+        <div class="login-form">
+            <form method="POST">
+
+                <div class="container">
+                    <div class="signup-info">
+                        <label>Name:</label>
+                        <input type="text" name="name" required>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="signup-info">
+                        <label>Email:</label>
+                        <input type="email" name="email" required>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="signup-info">
+                        <label>Role:</label>
+                        <select name="role">
+                            <option value="doctor">Doctor</option>
+                            <option value="nurse">Nurse</option>
+                            <option value="patient">Patient</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="signup-info">
+                        <label>New Password:</label>
+                        <input type="password" name="password" required> 
+                    </div>
+                </div>
+
+                <div class="container">
+                    <div class="signup-info">
+                        <label>Confirm Password:</label>
+                        <input type="password" name="confirm_pw" required>
+                    </div>
+                </div>
+                
+                <button type="submit">Confirm</button><br>
+            </form>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <p>Back to login? <a href="/login">Login</a></p>
+
+    </div>
+</div>
+{% endblock %}

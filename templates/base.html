@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/desktop.css') }}">
+</head>
+
+<body>
+
+    {% if show_menu %}
+    <!-- Header -->
+    <div class="header-bar">
+        <div class="logo">
+            <p>🏥</p>
+        </div>
+
+        <!-- Side menu -->
+        <nav class="nav-links" id="navLinks">
+            <ul>
+                {% if role == "doctor" %}
+                <li><a href="/doctor">HOME</a></li>
+                <li><a href="/doctor/appointments">APPOINTMENTS</a></li>
+                <li><a href="/doctor/slots">SLOTS</a></li>
+                <li><a href="/doctor/patient-records">PATIENT RECORDS</a></li>
+                <li><a href="/doctor/personal-info">PERSONAL INFO</a></li>
+                <li><a href="#" onclick="confirmSignOut(event)">SIGN OUT</a></li>
+                {% endif %}
+
+
+                {% if role == "nurse" %}
+                <li><a href="/nurse">HOME</a></li>
+                <li><a href="/nurse/upcoming-appt">APPOINTMENTS</a></li>
+                <li><a href="/nurse/patient">PATIENT LIST</a></li>
+                <li><a href="/nurse/personal-info">PERSONAL INFO</a></li>
+                <li><a href="#" onclick="confirmSignOut(event)">SIGN OUT</a></li>
+                {% endif %}
+
+
+                {% if role == "patient" %}
+                <li><a href="/patient">HOME</a></li>
+                <li><a href="/patient/appointments">APPOINTMENTS</a></li>
+                <li><a href="/patient/medical_records">MEDICAL RECORDS</a></li>
+                <li><a href="/patient/personal-info">PERSONAL INFO</a></li>
+                <li><a href="#" onclick="confirmSignOut(event)">SIGN OUT</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <div class="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+    </div>
+
+    {% endif %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <div id="signOut" class="modal">
+        <div class="popup">
+            <div class="close-header">
+                <h4>Sign Out</h4>
+                <span class="close" onclick="closeConfirmationModal()">&times;</span>
+            </div>
+
+
+            <h3>Do you want to sign out from your account?</h3> <br>
+
+            <div class="btns">
+                <p class="btn" onclick="signOut()">Yes</p>
+                <p class="btn" onclick="closeConfirmationModal()">No</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+
+    {% if show_footer %}
+    <footer id="contact">
+        <div class="footer-container">
+            <div class="footer-info">
+                <h2>Location 📍</h2>
+                <ul>
+                    <li>Main Street</li>
+                    <li>Sheffield, SF4 2CB</li>
+                </ul>
+            </div>
+
+            <div class="footer-info">
+                <h2>Contact Us 📞</h2>
+                <ul>
+                    <li>Tel:(01321) 2340 235</li>
+                    <li>Email: <a href="mailto:info@brightcare.ac.uk">info@brightcare.ac.uk</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <p class="footer-copyright">© 2026 BrightCare. All Rights Reserved</p>
+    </footer>
+    {% endif %}
+</body>
+
+</html>

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Upcoming Appointments{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <div class="img-container">
+        <img src="{{ url_for('static', filename='img/appt.jpg') }}" alt="Appointment Image">
+
+        <h1>Upcoming Appointments</h1>
+        <p>View your upcoming appointments and save patient vitals.</p>
+    </div>
+</div>
+
+<div class="appt-filter">
+    <label for="apptFilter">View Appointments:</label>
+    <select id="apptFilter" onchange="filterAppointments()">
+        <option value="upcoming">Upcoming</option>
+        <option value="missed">Missed</option>
+    </select>
+</div>
+
+<div class="section-card" id="upcomingSection">
+    <div class="h2-container">
+        <h2>Upcoming Appointments</h2>
+        <p>View all your upcoming appointments below.</p>
+    </div>
+
+    {% if grouped_upcoming %}
+    {% for date, upcoming_gp in grouped_upcoming.items() %}
+
+    <div class="dateBtnContainer">
+        <div class="date-header">
+            <div class="date-container">
+                <h3>📆 {{ date }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Patient ID</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for appointment in upcoming_gp %}
+
+                <tr class="appt-row clickable-row" onclick="addVitals('{{ appointment.AppointmentID }}')">
+                    <td>{{ appointment.AppointmentID }}</td>
+                    <td>{{ appointment.PatientID }}</td>
+
+                    <td>
+                        <div class="time-cell">
+                            {{ appointment.Time }}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% endfor %}
+
+    {% else %}
+    <div class="no-appt">
+        <h4>No Upcoming Appointments</h4>
+        <p>All appointments have been processed 🎉</p>
+
+        <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+
+        <a href="{{ url_for('nurse_dashboard') }}" class="back">
+            Back to Dashboard ▸
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<br>
+
+
+<div class="section-card" id="missedSection">
+    <div class="h2-container">
+        <h2>Missed Appointments</h2>
+        <p>View all your missed appointments below.</p>
+    </div>
+    {% if grouped_missed %}
+    {% for date, missed_gp in grouped_missed.items() %}
+
+    <div class="appt-gp">
+        <div class="group-container">
+            <div class="date-header">
+                <div class="date-container">
+                    <h3>📆 {{ date }}</h3>
+                </div>
+            </div>
+
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Appointment ID</th>
+                            <th>Patient ID</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for appointment in missed_gp %}
+                        <tr class="appt-row missed-row">
+                            <td>{{ appointment.AppointmentID }}</td>
+                            <td>{{ appointment.PatientID }}</td>
+
+                            <td>
+                                <div class="time-cell">
+                                    {{ appointment.Time }}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+    {% else %}
+    <div class="no-appt">
+        <h4>No Missed Appointments</h4>
+        <p>All appointments have been processed 🎉</p>
+
+        <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+
+        <a href="{{ url_for('nurse_dashboard') }}" class="back">
+            Back to Dashboard ▸
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

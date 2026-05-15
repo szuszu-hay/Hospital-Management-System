@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Access Portal{% endblock %}
+
+{% block content %}
+<div class="access-page">
+    <div class="logoText">
+        <h1>🏥 BrightCare Hospital</h1>
+    </div>
+    <p>Please select your role to continue</p>
+
+    <div class="portal">
+        <h2>Access Portal</h2>
+
+        <div class="dropdown">
+            <div class="select">
+                <span class="selected">Patient</span>
+                <span class="caret">&#9662;</span>
+            </div>
+
+            <ul class="menu">
+                <li class="active">Patient</li>
+                <li>Doctor</li>
+                <li>Nurse</li>
+            </ul>
+        </div>
+
+        <a id="enterLink" href="#">
+            <button class="enter-btn">Enter</button>
+        </a>
+    </div>
+    
+    <p class="new-user" id="signUp">New Users? <a href="/signup">Sign Up</a></p>
+    <p class="new-user" id="patient">Patients must register at the hospital reception.</p>
+</div>
+{% endblock %}

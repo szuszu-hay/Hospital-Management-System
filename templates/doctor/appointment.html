@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+
+    <div class="img-container">
+        <img src="{{ url_for('static', filename='img/appt.jpg') }}" alt="Appointment Image">
+        <h1>Doctor Appointments</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+</div>
+
+<div class="book-appt">
+    <button type="button" onclick="openApptForm()">✅ Book Appointment</button>
+</div>
+
+<div class="appt-filter">
+    <label for="apptFilter">View Appointments:</label>
+    <select id="apptFilter" onchange="filterAppointments()">
+        <option value="ready" selected>Ready to Consult</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="completed">Completed</option>
+        <option value="missed">Missed</option>
+    </select>
+</div>
+
+<div class="appointments">
+
+    <input type="hidden" id="selectedAppointmentId">
+
+    <!-- vitals saved appts -->
+    <div class="section-card" id="readySection">
+        <div class="h2-container">
+            <h2>Ready For Consultation</h2>
+            <p>All required vitals have been recorded.</p>
+        </div>
+
+        {% if grouped_ready %}
+        {% for date, appointments_gp in grouped_ready.items() %}
+
+        <div class="appt-gp">
+            <div class="group-container">
+                <div class="dateBtnContainer">
+                    <div class="date-header">
+                        <div class="date-container">
+                            <h3>📆 {{ date }}</h3>
+                        </div>
+                    </div>
+
+                    <div class="complete-btn">
+                        <button type="button" onclick="markCompleted()">Done</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <th>Appointment ID</th>
+                            <th>Patient ID</th>
+                            <th>Time</th>
+                        </thead>
+
+                        <tbody>
+                            {% for appointment in appointments_gp %}
+
+                            <tr class="appt-row" data-id="{{ appointment.AppointmentID }}"
+                                data-name="{{ appointment.Name }}" data-doc="{{ appointment.DoctorID }}">
+                                <td>{{ appointment.AppointmentID }}</td>
+                                <td>{{ appointment.PatientID }}</td>
+
+                                <td>
+                                    <div class="time-cell">
+                                        {{ appointment.Time }}
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% endfor %}
+
+            {% else %}
+            <div class="no-appt">
+                <p>Appointments Ready for Consultation ⭐</p>
+                <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+            </div>
+            {% endif %}
+
+        </div>
+
+        <p id="reminder">Select an appointment to mark as completed.</p>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <section class="appointment-section">
+
+        <!-- vitals not saved -->
+        <div class="section-card" id="upcomingSection">
+            <div class="h2-container">
+                <h2>Upcoming Appointments</h2>
+                <p>View all your upcoming appointments below.</p>
+            </div>
+
+            {% if grouped_upcoming %}
+            {% for date, appointments_gp in grouped_upcoming.items() %}
+
+            <div class="appt-gp">
+                <div class="group-container">
+                    <div class="date-header">
+                        <div class="date-container">
+                            <h3>📆 {{ date }}</h3>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <th>Appointment</th>
+                                <th>Patient</th>
+                                <th>Time</th>
+                            </thead>
+
+                            <tbody>
+                                {% for appointment in appointments_gp %}
+
+                                <tr class="appt-row" data-id="{{ appointment.AppointmentID }}"
+                                    data-name="{{ appointment.Name }}">
+                                    <td>{{ appointment.AppointmentID }}</td>
+                                    <td>{{ appointment.PatientID }}</td>
+
+                                    <td>
+                                        <div class="time-cell">
+                                            {{ appointment.Time }}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+
+            {% else %}
+            <div class="no-appt">
+                <p>Appointments Scheduled 👩🏼‍⚕️</p>
+                <img src="{{ url_for('static', filename='img/no-slots.jpg') }}" alt="A calendar">
+            </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <!-- Completed Appointments -->
+    <section class="appointment-section">
+        <div class="section-card" id="completedSection">
+            <div class="h2-container">
+                <h2>Completed Appointments</h2>
+                <p>View your completed appointments below.</p>
+            </div>
+
+            {% if grouped_completed %}
+            {% for date, appointments_gp in grouped_completed.items() %}
+
+            <div class="group-container">
+                <div class="date-header">
+                    <div class="date-container">
+                        <h3>📆 {{ date }}</h3>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Appointment</th>
+                                <th>Patient</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for appointment in appointments_gp %}
+
+                            <tr class="clickable-row" onclick="openDetailsModal(
+                                    '{{ appointment.PatientID }}',
+                                    '{{ appointment.Name }}',
+                                    '{{ appointment.AppointmentID }}',
+                                    '{{ appointment.Date }}',
+                                    '{{ appointment.Time }}',
+                                    `{{ appointment.Diagnosis }}`,
+                                    `{{ appointment.Prescriptions }}`,
+                                    '{{ appointment.Temperature }}',
+                                    '{{ appointment.BloodPressure }}',
+                                    '{{ appointment.HeartRate }}')">
+                                <td>{{ appointment.AppointmentID }}</td>
+                                <td>{{ appointment.PatientID }}</td>
+
+                                <td>
+                                    <div class="time-cell">
+                                        {{ appointment.Time }}
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <br>
+            {% endfor %}
+            <p class="instruct">Click each row to view more details.</p>
+
+            {% else %}
+            <div class="no-appt">
+                <h4>No Appointments Completed 📆</h4>
+                <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- missed appt -->
+    <section class="appointment-section">
+        <div class="section-card" id="missedSection">
+            <div class="h2-container">
+                <h2>Missed Appointments</h2>
+                <p>Check missed appointments below.</p>
+            </div>
+
+            {% if grouped_missed %}
+            {% for date, appointments_gp in grouped_missed.items() %}
+
+            <div class="appt-gp">
+                <div class="group-container">
+                    <div class="date-header">
+                        <div class="date-container">
+                            <h3>📆 {{ date }}</h3>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <th>Appointment</th>
+                                <th>Patient</th>
+                                <th>Time</th>
+                            </thead>
+
+                            <tbody>
+                                {% for appointment in appointments_gp %}
+
+                                <tr class="missed-row">
+                                    <td>{{ appointment.AppointmentID }}</td>
+                                    <td>{{ appointment.PatientID }}</td>
+
+                                    <td>
+                                        <div class="time-cell">
+                                            {{ appointment.Time }}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+
+            <div class="no-appt">
+
+            {% else %}
+            <div class="no-appt">
+                <h4>No Missed Appointments 🎉</h4>
+                <img src="{{ url_for('static', filename='img/no-appt.jpg') }}" alt="A calendar">
+            </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+
+</div>
+
+
+<!-- Book appointment form modal -->
+<div id="apptForm" class="modal">
+    <div class="popup">
+        <div class="close-header">
+            <h4>Book An Appointment</h4>
+            <span class="close" onclick="closeApptForm()">&times;</span>
+        </div>
+
+        <h3>Select an available slot</h3>
+
+        <form method="POST" class="recordForm">
+            <input type="hidden" name="action" value="book">
+
+            <div class="each-info">
+                <label for="slot">Select Slot:</label>
+
+                <select id="slot" name="slot_id" required>
+                    <option value="" disabled selected>Select a slot</option>
+
+                    {% for slot in available_slots %}
+                    <option value="{{ slot.SlotID }}">
+                        {{ slot.Date }} at {{ slot.Time }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <div class="each-info">
+                <label>Patient ID:</label>
+                <input type="text" name="patient_id" required placeholder="Enter patient ID" id="pat-id">
+            </div>
+
+            <div class="errorBtnContainer">
+                <p id="booking-error"></p>
+                <button type="submit" class="form-button">Book Appointment</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<!-- Completed appt details modal -->
+<div id="detailsModal" class="modal">
+    <div class="popup">
+
+        <div class="close-header">
+            <h4>View Appointment Details</h4>
+            <span class="close" onclick="closeDetailsModal()">&times;</span>
+        </div>
+
+        <div class="detailsForm">
+            <h3 class="details-h3">Patient Information</h3>
+            <div class="details-container">
+                <p><strong>Patient ID:</strong> <span id="d-patient"></span></p>
+                <p><strong>Name:</strong> <span id="d-name"></span></p>
+                <p><strong>Appointment ID:</strong> <span id="d-id"></span></p>
+                <p><strong>Date/Time:</strong> <span id="d-date"></span>
+                    (<span id="d-time"></span>)</p>
+            </div>
+
+            <div class="details-section">
+                <div class="consultation-info">
+                    <div class="consultation-header">
+                        <span>Vitals</span>
+                        <button type="button" class="plus-btn">+</button>
+                    </div>
+
+                    <div class="expandConsultation">
+                        <ul>
+                            <li>Temperature: <span id="d-temp"></span> °F</li>
+                            <li>Blood Pressure: <span id="d-bp"></span> mmHg</li>
+                            <li>Heart Rate: <span id="d-hr"></span> bpm</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="consultation-info">
+                    <div class="consultation-header">
+                        <span>Diagnosis</span>
+                        <button type="button" class="plus-btn">+</button>
+                    </div>
+
+                    <div class="expandConsultation">
+                        <p id="d-diagnosis"></p>
+                    </div>
+                </div>
+
+                <div class="consultation-info">
+                    <div class="consultation-header">
+                        <span>Prescriptions</span>
+                        <button type="button" class="plus-btn">+</button>
+                    </div>
+
+                    <div class="expandConsultation">
+                        <p id="d-prescription"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Add records modal -->
+<div id="addRec" class="modal">
+    <div class="popup">
+        <div class="close-header">
+            <h4>Add Patient Records</h4>
+            <span class="close" onclick="closeRecForm()">&times;</span>
+        </div>
+
+        <form method="POST" class="recordForm" onsubmit="return formValidation()">
+            <h3>Consultation Records</h3>
+
+            <input type="hidden" name="action" value="complete">
+
+            <input type="hidden" name="appointment_id" id="modalApptID">
+
+            <div class="each-info">
+                <label>Patient ID:</label>
+                <input name="patient_id" id="modalPatID" readonly>
+            </div>
+
+            <div class="each-info">
+                <label>Name:</label>
+                <input id="modalPatName" readonly>
+            </div>
+
+            <div class="consultation-group">
+
+                <div class="consultation-info">
+                    <div class="consultation-header">
+                        <span>Diagnosis</span>
+                        <button type="button" class="plus-btn">+</button>
+                    </div>
+
+                    <div class="expandConsultation">
+                        <div class="field">
+                            <label>Diagnosis:</label>
+                            <input name="diagnosis">
+                        </div>
+
+                        <div class="textarea">
+                            <label>Details (Optional):</label>
+                            <textarea name="description" rows="3"
+                                placeholder="Enter any additional details here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="consultation-info">
+                    <div class="consultation-header">
+                        <span>Prescriptions</span>
+                        <button type="button" class="plus-btn">+</button>
+                    </div>
+
+                    <div class="expandConsultation">
+                        <div class="field">
+                            <label>Prescriptions:</label>
+                            <input name="prescriptions">
+                        </div>
+
+                        <div class="textarea">
+                            <label>Instruction (Optional):</label>
+                            <textarea name="instruction" rows="3"
+                                placeholder="Enter any additional details here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="each-info">
+                <label>Doctor ID:</label>
+                <input value="{{ session['user_id'] }}" readonly>
+            </div>
+
+            <p id="record-error"></p>
+
+            <button type="submit" class="form-button">Save</button>
+        </form>
+
+
+    </div>
+</div>
+
+<script>
+    //go to appt page with selected slot
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectedSlot = "{{ selected_slot|default('') }}";
+        const select = document.getElementById("slot");
+        const modal = document.getElementById("apptForm");
+
+        if (selectedSlot && select) {
+
+            // check if the slot exists in dropdown
+            const option = select.querySelector(`option[value="${selectedSlot}"]`);
+
+            if (option) {
+                select.value = selectedSlot;
+
+                modal.classList.add("show");
+                document.body.classList.add("scroll-lock");
+            }
+        }
+    });
+
+</script>
+
+{% endblock %}

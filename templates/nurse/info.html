@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Personal Info{% endblock %}
+
+{% block content %}
+
+<div class="info-header">
+    <h1>Personal Information</h1>
+    <p>View and edit your personal information below.</p>
+</div>
+
+
+<div class="information">
+
+    <div class="info-container">
+        <form method="POST" class="edit-form">
+            {% if nurse %}
+
+            <div class="each-info">
+                <label>Name: </label>
+                <input type="text" name="name" value="{{ nurse.Name }}" class="editable" disabled required><br><br>
+            </div>
+
+            <div class="each-info">
+                <label>ID: </label>
+                <input type="text" name="id" value="{{ nurse.NurseID }}" readonly required><br><br>
+            </div>
+
+            <div class="each-info">
+                <label>Email: </label>
+                <input type="email" name="email" value="{{ nurse.Email }}" class="editable" disabled required><br><br>
+            </div>
+
+            <div class="each-info">
+                <label>Phone: </label>
+                <input type="tel" name="phone" value="{{ nurse.TelNo }}" class="editable" disabled required><br><br>
+            </div>
+
+            <div class="each-info">
+                <label>Ward: </label>
+                <input type="text" name="ward" value="{{ nurse.Ward }}" class="editable" readonly required><br><br>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <p id="editMsg" class="instruct" style="display:none;">
+                ✏️ You are now editing your information
+            </p>
+
+            <div class="btn-container">
+                <button type="button" class="edit-btn">Edit Your Details</button>
+                <button type="submit" class="save-btn" style="display: none;">Save Changes</button>
+                <button type="button" class="cancel-btn" style="display: none;">Cancel</button>
+                <button type="reset" class="reset-btn" style="display: none;">
+                    <img src="{{ url_for('static', filename='img/reset.png') }}" alt="Reset">
+                </button>
+            </div>
+
+            {% else %}
+            <p>No information available 🚫</p>
+            {% endif %}
+
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}
